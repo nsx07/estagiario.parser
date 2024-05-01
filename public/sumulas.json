@@ -1,0 +1,5 @@
+{
+  "firstLookAhead": "(Súmula nº \"d{1,3} do TST){1}",
+  "secondLookAhead": "((\n)+([IVXMCL]+){1}(\"s)+-)+ ",
+  "splitter": "((\n)+([IVXMCL]+){1}(\"s)+-)+ "
+}

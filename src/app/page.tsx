@@ -14,17 +14,19 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { getExcel, proccess } from "@/proccess/parser";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Spreadsheet, { CellBase, Matrix } from "react-spreadsheet";
 
 export default function Home() {
-  const form = useForm();
   const [result, setResult] = useState<string | null>(null);
   const [excel, setExcel] = useState<Matrix<CellBase<any>>>([]);
   const [showTable, setShowTable] = useState<boolean>(false);
   const [buffer, setBuffer] = useState<File>();
+  const { toast } = useToast();
+  const form = useForm();
 
   const proc = async () => {
     const raw = form.getValues();
@@ -90,27 +92,37 @@ export default function Home() {
                     <ScrollArea className="h-[80vh] w-full rounded-md border">
                       <pre>{result}</pre>
                     </ScrollArea>
-                    <button
+                    <div
+                      className={`${
+                        !result || result.length === 0 ? "hidden" : "block"
+                      } absolute flex items-center justify-center top-2 right-2 z-40 p-2 rounded-full bg-gray-300 bg-blend-lighten text-gray-800 hover:bg-gray-100 hover:bg-opacity-50`}
                       onClick={() => {
-                        navigator.clipboard.writeText(result!);
+                        if (result && result.length > 0) {
+                          navigator.clipboard.writeText(result!);
+                          toast({
+                            title: "Copiado!",
+                            type: "foreground",
+                          });
+                        }
                       }}
-                      className="absolute top-4 right-4 z-40"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        className="w-6 h-6"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
-                        />
-                      </svg>
-                    </button>
+                      <button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
