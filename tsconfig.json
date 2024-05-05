@@ -4,6 +4,8 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "noImplicitAny": false,
+    "strictPropertyInitialization": false,
     "noEmit": true,
     "target": "ES2022",
     "esModuleInterop": true,

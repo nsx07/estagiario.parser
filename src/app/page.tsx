@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,7 +24,7 @@ export default function Home() {
   const [result, setResult] = useState<string | null>(null);
   const [excel, setExcel] = useState<Matrix<CellBase<any>>>([]);
   const [showTable, setShowTable] = useState<boolean>(false);
-  const [buffer, setBuffer] = useState<File>();
+  const [buffer, setBuffer] = useState<ArrayBuffer>();
   const { toast } = useToast();
   const form = useForm();
 
@@ -34,9 +34,9 @@ export default function Home() {
       file: buffer!,
       end: raw.end,
       begin: raw.begin,
-      splitterRegex: new RegExp(raw.splitter),
-      firstLookAhead: new RegExp(raw.firstReg),
-      secondLookAhead: new RegExp(raw.secondReg),
+      splitterRegex: new RegExp(raw.splitter, "g"),
+      firstLookAhead: new RegExp(raw.firstReg, "g"),
+      secondLookAhead: new RegExp(raw.secondReg, "g"),
     });
 
     setResult(JSON.stringify(proc, null, 2));
@@ -46,7 +46,7 @@ export default function Home() {
     const jsonData = await getExcel(buffer);
     setExcel(jsonData as any);
     setShowTable(true);
-    setBuffer(buffer);
+    setBuffer(await buffer.arrayBuffer());
   };
 
   return (
