@@ -25,6 +25,7 @@ export default function Home() {
   const [excel, setExcel] = useState<Matrix<CellBase<any>>>([]);
   const [showTable, setShowTable] = useState<boolean>(false);
   const [buffer, setBuffer] = useState<ArrayBuffer>();
+  const [text, setText] = useState<string>();
   const { toast } = useToast();
   const form = useForm();
 
@@ -43,10 +44,33 @@ export default function Home() {
   };
 
   const upload = async (buffer: File) => {
-    const jsonData = await getExcel(buffer);
-    setExcel(jsonData as any);
-    setShowTable(true);
-    setBuffer(await buffer.arrayBuffer());
+    console.log(buffer.name);
+
+    const extension = buffer.name.split(".").pop();
+
+    if (extension === "xlsx") {
+      const jsonData = await getExcel(buffer);
+      setExcel(jsonData as any);
+      setShowTable(true);
+      setBuffer(await buffer.arrayBuffer());
+      return;
+    }
+
+    if (extension === "txt") {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const text = e.target?.result as string;
+        setText(text);
+        setShowTable(true);
+      };
+
+      reader.readAsText(buffer);
+      return;
+    }
+
+    toast({
+      title: "Formato inválido",
+    });
   };
 
   return (
@@ -80,11 +104,20 @@ export default function Home() {
                 </TabsList>
                 <TabsContent value="sheet">
                   <ScrollArea className="h-[80vh] w-full rounded-md border">
-                    <Spreadsheet
-                      hideRowIndicators={true}
-                      data={excel}
-                      hideColumnIndicators={true}
-                    />
+                    {excel && excel.length > 0 ? (
+                      <Spreadsheet
+                        data={excel}
+                        hideRowIndicators={true}
+                        hideColumnIndicators={true}
+                      />
+                    ) : (
+                      <Textarea
+                        value={text}
+                        className="w-full h-full"
+                        rows={37}
+                        readOnly
+                      />
+                    )}
                   </ScrollArea>
                 </TabsContent>
                 <TabsContent value="result">
@@ -92,36 +125,38 @@ export default function Home() {
                     <ScrollArea className="h-[80vh] w-full rounded-md border">
                       <pre>{result}</pre>
                     </ScrollArea>
-                    <div
-                      className={`${
-                        !result || result.length === 0 ? "hidden" : "block"
-                      } absolute flex items-center justify-center top-2 right-2 z-40 p-2 rounded-full bg-gray-300 bg-blend-lighten text-gray-800 hover:bg-gray-100 hover:bg-opacity-50`}
-                      onClick={() => {
-                        if (result && result.length > 0) {
-                          navigator.clipboard.writeText(result!);
-                          toast({
-                            title: "Copiado!",
-                            type: "foreground",
-                          });
-                        }
-                      }}
-                    >
-                      <button>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke-width="1.5"
-                          stroke="currentColor"
-                          className="w-6 h-6"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
-                          />
-                        </svg>
-                      </button>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`${
+                          !result || result.length === 0 ? "hidden" : "block"
+                        } absolute flex items-center justify-center top-2 right-2 z-40 p-2 rounded-full bg-gray-300 bg-blend-lighten text-gray-800 hover:bg-gray-100 hover:bg-opacity-50`}
+                        onClick={() => {
+                          if (result && result.length > 0) {
+                            navigator.clipboard.writeText(result!);
+                            toast({
+                              title: "Copiado!",
+                              type: "foreground",
+                            });
+                          }
+                        }}
+                      >
+                        <button>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            className="w-6 h-6"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
