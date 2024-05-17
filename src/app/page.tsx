@@ -32,20 +32,20 @@ export default function Home() {
   const proc = async () => {
     const raw = form.getValues();
     const proc = await proccess({
-      file: buffer!,
+      file: buffer ?? text,
       end: raw.end,
       begin: raw.begin,
       splitterRegex: new RegExp(raw.splitter, "g"),
       firstLookAhead: new RegExp(raw.firstReg, "g"),
-      secondLookAhead: new RegExp(raw.secondReg, "g"),
+      secondLookAhead: raw.secondReg.includes("@@|")
+        ? raw.secondReg.split("@@|").map((x) => new RegExp(x, "g"))
+        : new RegExp(raw.secondReg, "g"),
     });
 
     setResult(JSON.stringify(proc, null, 2));
   };
 
   const upload = async (buffer: File) => {
-    console.log(buffer.name);
-
     const extension = buffer.name.split(".").pop();
 
     if (extension === "xlsx") {

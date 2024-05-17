@@ -173,7 +173,7 @@ const proccessSum = (raw, pat) => {
 
   if (sections) {
     const json = Array.from(partition()).concat({
-      eventId: sum[0],
+      eventId: sum ? sum[0] : "#ERROR#",
       date: sumtext,
     });
     return json;
@@ -191,32 +191,41 @@ const proccessFile = (f, pat) => {
 };
 
 const save = (f) => {
-  fs.writeFileSync(
-    "C://Personal/scripts/node/parser-excel/output.json",
-    JSON.stringify(f)
-  );
+  fs.writeFileSync("output.json", JSON.stringify(f));
 };
 
 export const proccess = async (pat) => {
   let { source } = { source: [] as any[] };
 
-  let data = new Uint8Array(Buffer.from(pat.file));
-  const workbook = read(data, { type: "array" });
-  const sheetNames = workbook.SheetNames;
+  if (typeof pat.file == "string") {
+    const data = pat.file;
+    const parts = data
+      .split(pat.begin)
+      .filter(Boolean)
+      .map((x) => pat.begin + x);
+    source = proccessFile(parts, pat).flat(1);
 
-  for (let sheetName of sheetNames) {
-    const sheet = workbook.Sheets[sheetName];
-    const rows = utils.sheet_to_json(sheet, { header: 1 });
+    console.log(source);
+  } else {
+    let data = new Uint8Array(Buffer.from(pat.file));
+    const workbook = read(data, { type: "array" });
+    const sheetNames = workbook.SheetNames;
 
-    const file = rows
-      .flat(1)
-      .filter((x) => typeof x == "string" && x.match(pat.firstLookAhead));
+    for (let sheetName of sheetNames) {
+      const sheet = workbook.Sheets[sheetName];
+      const rows = utils.sheet_to_json(sheet, { header: 1 });
 
-    if (file.length > 0) {
-      source.push(...proccessFile(file, pat).flat(1));
+      const file = rows
+        .flat(1)
+        .filter((x) => typeof x == "string" && x.match(pat.firstLookAhead));
+
+      if (file.length > 0) {
+        source.push(...proccessFile(file, pat).flat(1));
+      }
     }
+
+    data = null as unknown as Uint8Array;
   }
 
-  data = null as unknown as Uint8Array;
   return source;
 };
