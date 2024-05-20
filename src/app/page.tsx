@@ -33,6 +33,7 @@ export default function Home() {
     const raw = form.getValues();
     const proc = await proccess({
       file: buffer ?? text,
+      aux: raw.aux,
       end: raw.end,
       begin: raw.begin,
       splitterRegex: new RegExp(raw.splitter, "g"),
@@ -170,6 +171,20 @@ export default function Home() {
               Como você deseja processar esse arquivo?
             </h2>
             <Form {...form}>
+              <FormField
+                control={form.control}
+                name="aux"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descricao auxiliar Artigo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="do CDC" {...field} />
+                    </FormControl>
+                    <FormDescription>Texto auxiliar.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="begin"
